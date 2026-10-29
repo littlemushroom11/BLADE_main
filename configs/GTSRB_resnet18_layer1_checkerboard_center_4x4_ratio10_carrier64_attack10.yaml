@@ -1,0 +1,62 @@
+seed: 1
+device: cuda
+output_dir: outputs/GTSRB_resnet18_layer1_checkerboard_center_4x4_ratio10_carrier64
+
+warmup_checkpoint:
+  load_path: outputs/clean_resnet18_bank/gtsrb/gtsrb_resnet18_split_early_best.pt
+
+dataset:
+  name: gtsrb
+  data_dir: ./data
+  batch_size: 256
+  num_workers: 4
+  train_subset: null
+  test_subset: null
+
+model:
+  arch: resnet18
+  in_channels: 3
+  num_classes: 43
+  split: early
+
+train:
+  warmup_epochs: 30
+  attack_epochs: 10
+  optimizer: sgd
+  lr_client: 0.1
+  lr_server: 0.1
+  momentum: 0.9
+  nesterov: true
+  weight_decay: 0.0005
+
+attack:
+  target_class: 2
+  use_calibrated_magnitude: true
+  delta_topk_ratio: 0.10
+  delta_norm_clip: 8.0
+  delta_scale: 1.0
+  carrier_count: 64
+  feature_stats_max_batches: null
+  trigger_name: checkerboard
+  trigger_position: center
+  patch_size: 4
+  trigger_alpha: 1.0
+
+  lr_server: 0.01
+  latent_scale_min: 1.0
+  latent_scale_max: 1.0
+  latent_noise_std: 0.0
+  sample_carrier_shifts: false
+
+  cached_feature_attack:
+    enabled: true
+    cache_last_epochs: 1
+    reuse_cache_dir: null
+    poison_classes: all
+    poison_fraction: 0.01
+    poison_label_mode: target
+    poison_mode: add
+    cache_dtype: float16
+
+logging:
+  eval_every: 1
